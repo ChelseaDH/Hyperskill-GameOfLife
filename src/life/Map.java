@@ -85,4 +85,18 @@ public class Map {
                 return grid[(cellX - 1 + size) % size][(cellY + 1) % size];
         }
     }
+
+    public int aliveCells() {
+        int alive = 0;
+
+        for (int i = 0; i < this.size; i++) {
+            for (int j = 0; j < this.size; j++) {
+                if (this.grid[i][j] == Cell.ALIVE) {
+                    alive++;
+                }
+            }
+        }
+
+        return alive;
+    }
 }
