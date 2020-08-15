@@ -7,11 +7,12 @@ public class Map {
     public Cell[][] grid;
     public int size;
 
-    // Initialises either a completely dead or random map of a given size
+    // Initialises either a completely dead or randomly filled map of a given size
     public Map(int size, Boolean dead) {
         if (dead) {
             this.size = size;
             this.grid = new Cell[this.size][this.size];
+
             for (Cell[] array: this.grid) {
                 Arrays.fill(array, Cell.DEAD);
             }
