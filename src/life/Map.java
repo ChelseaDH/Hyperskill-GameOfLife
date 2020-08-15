@@ -54,7 +54,7 @@ public class Map {
         int aliveNeighbours = 0;
 
         for (Direction d : Direction.values()) {
-            if (getNeighbour(cellX, cellY, d) == Cell.ALIVE) {
+            if (getNeighbour(cellX, cellY, d).alive) {
                 aliveNeighbours++;
             }
         }
@@ -89,7 +89,7 @@ public class Map {
 
         for (int i = 0; i < this.size; i++) {
             for (int j = 0; j < this.size; j++) {
-                if (this.grid[i][j] == Cell.ALIVE) {
+                if (this.grid[i][j].alive) {
                     alive++;
                 }
             }
