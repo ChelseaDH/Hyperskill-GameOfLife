@@ -1,13 +1,24 @@
 package life;
 
+import java.util.Arrays;
 import java.util.Random;
 
-public class Map{
+public class Map {
     public Cell[][] grid;
     public int size;
-    public int seed;
+    public long seed;
 
-    public Map(int size, int seed) {
+    // Initialises a dead map of a given size
+    public Map(int size) {
+        this.size = size;
+        this.grid = new Cell[this.size][this.size];
+        for (Cell[] array: this.grid) {
+            Arrays.fill(array, Cell.DEAD);
+        }
+    }
+
+    // Initialises a random map of a given size based on a given seed
+    public Map(int size, long seed) {
         this.size = size;
         this.seed = seed;
         initialiseGrid();
@@ -19,8 +30,8 @@ public class Map{
 
         for (int i = 0; i < this.size; i++) {
             for (int j = 0; j < this.size; j++) {
-                State state = random.nextBoolean() ? State.ALIVE : State.DEAD;
-                this.grid[i][j] = new Cell(state);
+                Cell cell = random.nextBoolean() ? Cell.ALIVE : Cell.DEAD;
+                this.grid[i][j] = cell;
             }
         }
     }
@@ -31,11 +42,47 @@ public class Map{
 
         for (int i = 0; i < this.size; i++) {
             for (int j = 0; j < this.size; j++) {
-                stringBuilder.append(this.grid[i][j].getChar());
+                stringBuilder.append(this.grid[i][j].getCharacter());
             }
-            stringBuilder.append('\n');
+            if (i < this.size - 1) {
+                stringBuilder.append('\n');
+            }
         }
 
         return stringBuilder.toString();
+    }
+
+    public int noOfAliveNeighbours(int cellX, int cellY) {
+        int aliveNeighbours = 0;
+
+        for (Direction d : Direction.values()) {
+            if (getNeighbour(cellX, cellY, d) == Cell.ALIVE) {
+                aliveNeighbours++;
+            }
+        }
+
+        return aliveNeighbours;
+    }
+
+    private Cell getNeighbour(int cellX, int cellY, Direction direction) {
+        switch (direction) {
+            case NORTH:
+                return grid[cellX][(cellY + 1) % size];
+            case NORTH_EAST:
+                return grid[(cellX + 1) % size][(cellY + 1) % size];
+            case EAST:
+                return grid[(cellX + 1) % size][cellY];
+            case SOUTH_EAST:
+                return grid[(cellX + 1) % size][(cellY - 1 + size) % size];
+            case SOUTH:
+                return grid[cellX][(cellY - 1 + size) % size];
+            case SOUTH_WEST:
+                return grid[(cellX - 1 + size) % size][(cellY - 1 + size) % size];
+            case WEST:
+                return grid[(cellX - 1 + size) % size][cellY];
+            case NORTH_WEST:
+            default:
+                return grid[(cellX - 1 + size) % size][(cellY + 1) % size];
+        }
     }
 }

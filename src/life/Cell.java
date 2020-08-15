@@ -1,18 +1,18 @@
 package life;
 
 public class Cell{
-    public State state;
+    public static final Cell ALIVE = new Cell('O', true);
+    public static final Cell DEAD = new Cell(' ', false);
 
-    public Cell(State state) {
-        this.state = state;
+    public char character;
+    public boolean alive;
+
+    private Cell(char character, boolean alive) {
+        this.character = character;
+        this.alive = alive;
     }
 
-    public char getChar() {
-        switch (state) {
-            case ALIVE:
-                return 'O';
-            default:
-                return ' ';
-        }
+    public char getCharacter() {
+        return character;
     }
 }
