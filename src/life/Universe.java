@@ -6,8 +6,8 @@ public class Universe {
     public int numberOfGenerations;
     private int generationNumber;
 
-    public Universe(int size, long generationSeed, int numberOfGenerations) {
-        this.currentGeneration = new Map(size, generationSeed);
+    public Universe(int size, int numberOfGenerations) {
+        this.currentGeneration = new Map(size, false);
         this.numberOfGenerations = numberOfGenerations;
         this.generationNumber = 0;
     }

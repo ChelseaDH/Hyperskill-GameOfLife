@@ -6,26 +6,24 @@ import java.util.Random;
 public class Map {
     public Cell[][] grid;
     public int size;
-    public long seed;
 
-    // Initialises a dead map of a given size
-    public Map(int size) {
-        this.size = size;
-        this.grid = new Cell[this.size][this.size];
-        for (Cell[] array: this.grid) {
-            Arrays.fill(array, Cell.DEAD);
+    // Initialises either a completely dead or random map of a given size
+    public Map(int size, Boolean dead) {
+        if (dead) {
+            this.size = size;
+            this.grid = new Cell[this.size][this.size];
+            for (Cell[] array: this.grid) {
+                Arrays.fill(array, Cell.DEAD);
+            }
+        }
+        else {
+            this.size = size;
+            initialiseGrid();
         }
     }
 
-    // Initialises a random map of a given size based on a given seed
-    public Map(int size, long seed) {
-        this.size = size;
-        this.seed = seed;
-        initialiseGrid();
-    }
-
     private void initialiseGrid() {
-        Random random = new Random(this.seed);
+        Random random = new Random();
         this.grid = new Cell[this.size][this.size];
 
         for (int i = 0; i < this.size; i++) {

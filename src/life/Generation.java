@@ -3,7 +3,7 @@ package life;
 public class Generation{
 
     public static Map evolve(Map currentGeneration) {
-        Map nextGeneration = new Map(currentGeneration.size);
+        Map nextGeneration = new Map(currentGeneration.size, true);
 
         for (int x = 0; x < currentGeneration.size; x++) {
             for (int y = 0; y < currentGeneration.size; y++) {
