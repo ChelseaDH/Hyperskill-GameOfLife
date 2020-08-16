@@ -23,6 +23,7 @@ public class Map {
         }
     }
 
+    // Function for creating a random map
     private void initialiseGrid() {
         Random random = new Random();
         this.grid = new Cell[this.size][this.size];
@@ -35,6 +36,7 @@ public class Map {
         }
     }
 
+    // Map printing
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -51,6 +53,8 @@ public class Map {
         return stringBuilder.toString();
     }
 
+    // Number of alive neighbours of a cell
+        // Looks at the eight cells that surround it, wrapping around the edge of the map
     public int noOfAliveNeighbours(int cellX, int cellY) {
         int aliveNeighbours = 0;
 
@@ -85,6 +89,7 @@ public class Map {
         }
     }
 
+    // Number of alive cells in the entire map
     public int aliveCells() {
         int alive = 0;
 

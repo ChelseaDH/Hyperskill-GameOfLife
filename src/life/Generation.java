@@ -2,6 +2,7 @@ package life;
 
 public class Generation{
 
+    // Takes a current generation of a universe and evolves it based on the rules listed below
     public static Map evolve(Map currentGeneration) {
         Map nextGeneration = new Map(currentGeneration.size, true);
 
