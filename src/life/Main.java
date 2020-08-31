@@ -14,13 +14,14 @@ public class Main {
         // Create the universe
         Universe universe = new Universe(mapSize);
 
+        // Create and initialise the board
+        GameOfLife gameOfLife = new GameOfLife();
+        gameOfLife.initialLayout(universe);
+
         // Run the simulation
-        while (universe.getGenerationNumber() < 10) {
-            // For each generation, print the generation number, number of alive cells, and state of the universe
-            System.out.printf("Generation #%d\n", universe.getGenerationNumber());
-            System.out.printf("Alive: %d\n", universe.currentGeneration.aliveCells());
-            System.out.println(universe.currentGeneration);
-            System.out.println();
+        while (universe.getGenerationNumber() < 20) {
+            // Add the current generation to the board
+            gameOfLife.addGeneration(universe);
 
             // Create the next generation
             universe.advance();
@@ -29,15 +30,6 @@ public class Main {
             try {
                 sleep(100);
             } catch (InterruptedException ignored) {}
-
-            // Clear the console
-            try {
-                if (System.getProperty("os.name").contains("Windows"))
-                    new ProcessBuilder("cmd","/c","cls").inheritIO().start().waitFor();
-                else
-                    Runtime.getRuntime().exec("clear");
-            }
-            catch (IOException | InterruptedException ignored) {}
         }
     }
 }
