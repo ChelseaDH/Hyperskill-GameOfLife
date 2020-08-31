@@ -2,46 +2,84 @@ package life;
 
 import javax.swing.*;
 import java.awt.*;
-import java.time.LocalDateTime;
-import java.util.Date;
 
 public class GameOfLife extends JFrame {
     JPanel topPanel;
+    JPanel interactivePanel;
+    Grid mapPanel;
     JLabel generationLabel;
     JLabel aliveLabel;
-    Grid mapPanel;
+
+    GridBagConstraints constraints;
 
     public GameOfLife() {
         super("Game of Life");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 500);
-        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+        setLayout(new GridBagLayout());
+        setMinimumSize(new Dimension(500, 400));
 
-        setVisible(true);
+        constraints = new GridBagConstraints();
     }
 
     // Initialises the GUI layout
     public void initialLayout(Universe universe) {
-        // Create top panel
-        topPanel = new JPanel();
-        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        add(topPanel);
+        createTopPanel();
+        createInteractivePanel();
+        createMapPanel(universe);
 
-        // Create generation counter label
+        pack();
+        setVisible(true);
+    }
+
+    private void createTopPanel() {
+        topPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.gridwidth = GridBagConstraints.REMAINDER;
+        add(topPanel, constraints);
+
+        // Add generation counter
         generationLabel = new JLabel();
         generationLabel.setName("GenerationLabel");
         generationLabel.setText("Generation #0");
-        // Create alive cell counter label
+        generationLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        topPanel.add(generationLabel);
+
+        // Add alive cell counter
         aliveLabel = new JLabel();
         aliveLabel.setName("AliveLabel");
         aliveLabel.setText("Alive: 0");
-        // Add labels to topPanel
-        topPanel.add(generationLabel);
+        aliveLabel.setHorizontalAlignment(SwingConstants.CENTER);
         topPanel.add(aliveLabel);
 
+        // Reset unused constraints
+        constraints.gridwidth = 1;
+    }
+
+    private void createInteractivePanel() {
+        interactivePanel = new JPanel();
+        interactivePanel.setLayout(new BoxLayout(interactivePanel, BoxLayout.Y_AXIS));
+        interactivePanel.setPreferredSize(new Dimension(100, 400));
+        interactivePanel.setBackground(Color.lightGray);
+
+        // Set constraints and add to board
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.fill = GridBagConstraints.VERTICAL;
+        add(interactivePanel, constraints);
+    }
+
+    private void createMapPanel(Universe universe) {
         // Create mapPanel
         mapPanel = new Grid(400, 400, universe.currentGeneration.size);
-        add(mapPanel);
+
+        // Set constraints and add to board
+        constraints.gridx = 1;
+        constraints.gridy = 1;
+        constraints.weightx = 1;
+        constraints.weighty = 1;
+        constraints.fill = GridBagConstraints.BOTH;
+        add(mapPanel, constraints);
     }
 
     // Add the updated universe information to GUI
@@ -52,7 +90,9 @@ public class GameOfLife extends JFrame {
 
         // Update the map within grid
         mapPanel.setMap(universe.currentGeneration);
-        mapPanel.repaint();
+        if (this.isVisible()) {
+            mapPanel.repaint();
+        }
     }
 
     // Class for displaying Maps
@@ -71,7 +111,7 @@ public class GameOfLife extends JFrame {
 
             this.cellWidth = width / this.mapSize;
             this.cellHeight = height / this.mapSize;
-            this.setSize(width, height);
+            this.setPreferredSize(new Dimension(width, height));
         }
 
         public void setMap(Map map) {
