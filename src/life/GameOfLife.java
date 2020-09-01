@@ -96,6 +96,16 @@ public class GameOfLife extends JFrame {
             }
         });
         interactivePanel.add(playPause);
+
+        // Add reset button
+        JButton resetButton = new JButton("Reset");
+        resetButton.setName("ResetButton");
+        resetButton.addActionListener(e -> {
+            this.universe.reset();
+            addGeneration();
+            mainThread.interrupt();
+        });
+        interactivePanel.add(resetButton);
     }
 
     private void createMapPanel() {
