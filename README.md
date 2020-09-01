@@ -4,4 +4,4 @@
 
 A simple version "Game of Life" using Java Swing to create an interactive GUI.
 
-Task status: in progress.
+Task status: Complete
