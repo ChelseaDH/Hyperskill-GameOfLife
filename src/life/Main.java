@@ -1,6 +1,5 @@
 package life;
 
-import java.io.IOException;
 import java.util.Scanner;
 import static java.lang.Thread.sleep;
 
@@ -8,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        // Get map size, generation seed and generation limit from the user
+        // Get map size from the user
         int mapSize = scanner.nextInt();
 
         // Create the universe
@@ -33,3 +32,4 @@ public class Main {
         }
     }
 }
+
