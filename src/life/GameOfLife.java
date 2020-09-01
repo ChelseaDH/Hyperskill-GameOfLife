@@ -9,14 +9,22 @@ public class GameOfLife extends JFrame {
     JPanel topPanel;
     JPanel interactivePanel;
     Grid mapPanel;
+
+    // interactivePanel components
     JLabel generationLabel;
     JLabel aliveLabel;
+    JTextField mapSizeField;
+    JButton playPause;
+    JButton resetButton;
 
     GridBagConstraints constraints;
 
     // Is the universe simulation running
     private boolean simulationRunning;
     Universe universe;
+
+    // Has initial map been added
+    boolean initialMapAdded;
 
     // Main thread
     Thread mainThread;
@@ -28,14 +36,13 @@ public class GameOfLife extends JFrame {
         setMinimumSize(new Dimension(500, 400));
 
         constraints = new GridBagConstraints();
-    }
 
-    // Initialises the GUI layout
-    public void initialLayout(Universe universe, Thread mainThread) {
-        this.universe = universe;
-        this.mainThread = mainThread;
-        this.simulationRunning = true;
+        // Set fields
+        this.mainThread = Thread.currentThread();
+        this.simulationRunning = false;
+        this.initialMapAdded = false;
 
+        // Initialise panels
         createTopPanel();
         createInteractivePanel();
         createMapPanel();
@@ -81,28 +88,83 @@ public class GameOfLife extends JFrame {
         constraints.fill = GridBagConstraints.VERTICAL;
         add(interactivePanel, constraints);
 
+        // Add components
+        addInteractivePanelComponents();
+
+        // Set play/pause and reset buttons to be initially inactive
+        playPause.setEnabled(false);
+        resetButton.setEnabled(false);
+    }
+
+    private void addInteractivePanelComponents() {
+        // Text field to set universe size
+        mapSizeField = new JTextField();
+        mapSizeField.setMaximumSize(new Dimension(200, 50));
+        // Add field verification
+        mapSizeField.setInputVerifier(new InputVerifier() {
+            @Override
+            public boolean verify(JComponent jComponent) {
+                String text = mapSizeField.getText();
+                int mapSize;
+
+                // Check for integer input
+                try {
+                    mapSize = Integer.parseInt(text);
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+                // Check that integer is greater than 0
+                return mapSize > 0;
+            }
+        });
+        // Add ActionListener
+        mapSizeField.addActionListener(e -> {
+            // Grab input
+            int newMapSize = Integer.parseInt(mapSizeField.getText());
+
+            // Update initial map added, if applicable
+            // Set play/pause to be active upon adding initial map
+            if (!initialMapAdded) {
+                initialMapAdded = true;
+                playPause.setEnabled(true);
+                resetButton.setEnabled(true);
+            }
+
+            // Create new universe of the added size
+            this.universe = new Universe(newMapSize);
+            mapPanel.setMapSize(newMapSize);
+            updateDisplay();
+            mainThread.interrupt();
+        });
+        interactivePanel.add(mapSizeField);
+
+        // Create label for mapSizeField
+        JLabel mapSizeFieldLabel = new JLabel("Universe size");
+        mapSizeFieldLabel.setLabelFor(mapSizeField);
+        interactivePanel.add(mapSizeFieldLabel);
+
         // Add play/pause button
-        JButton playPause = new JButton("Pause");
+        playPause = new JButton("Play");
         playPause.setName("PlayToggleButton");
         playPause.addActionListener(e -> {
             if (this.simulationRunning) {
                 this.simulationRunning = false;
                 mainThread.interrupt();
-                playPause.setText("Pause");
+                playPause.setText("Play");
             } else {
                 this.simulationRunning = true;
                 mainThread.interrupt();
-                playPause.setText("Play");
+                playPause.setText("Pause");
             }
         });
         interactivePanel.add(playPause);
 
         // Add reset button
-        JButton resetButton = new JButton("Reset");
+        resetButton = new JButton("Reset");
         resetButton.setName("ResetButton");
         resetButton.addActionListener(e -> {
             this.universe.reset();
-            addGeneration();
+            updateDisplay();
             mainThread.interrupt();
         });
         interactivePanel.add(resetButton);
@@ -110,7 +172,7 @@ public class GameOfLife extends JFrame {
 
     private void createMapPanel() {
         // Create mapPanel
-        mapPanel = new Grid(400, 400, this.universe.currentGeneration.size);
+        mapPanel = new Grid(400, 400);
 
         // Set constraints and add to board
         constraints.gridx = 1;
@@ -122,7 +184,7 @@ public class GameOfLife extends JFrame {
     }
 
     // Add the updated universe information to GUI
-    public void addGeneration () {
+    public void updateDisplay() {
         // Update generation and alive counters
         generationLabel.setText(String.format("Generation #%d", this.universe.getGenerationNumber()));
         aliveLabel.setText(String.format("Alive: %s", this.universe.currentGeneration.aliveCells()));
@@ -140,7 +202,7 @@ public class GameOfLife extends JFrame {
             if (this.simulationRunning) {
                 try {
                     // Add the current generation to the board
-                    this.addGeneration();
+                    this.updateDisplay();
 
                     // Create the next generation
                     this.universe.advance();
@@ -160,6 +222,7 @@ public class GameOfLife extends JFrame {
         }
     }
 
+
     // Class for displaying Maps
     public static class Grid extends JPanel {
         int width, height;
@@ -167,20 +230,22 @@ public class GameOfLife extends JFrame {
         Map map;
         int mapSize;
 
-        int cellWidth, cellHeight;
+        private int cellWidth, cellHeight;
 
-        public Grid(int width, int height, int mapSize) {
+        public Grid(int width, int height) {
             this.width = width;
             this.height = height;
-            this.mapSize = mapSize;
-
-            this.cellWidth = width / this.mapSize;
-            this.cellHeight = height / this.mapSize;
             this.setPreferredSize(new Dimension(width, height));
         }
 
         public void setMap(Map map) {
             this.map = map;
+        }
+
+        public void setMapSize(int mapSize) {
+            this.mapSize = mapSize;
+            this.cellWidth = width / this.mapSize;
+            this.cellHeight = height / this.mapSize;
         }
 
         @Override
