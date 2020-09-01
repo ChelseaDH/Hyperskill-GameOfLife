@@ -3,6 +3,8 @@ package life;
 import javax.swing.*;
 import java.awt.*;
 
+import static java.lang.Thread.sleep;
+
 public class GameOfLife extends JFrame {
     JPanel topPanel;
     JPanel interactivePanel;
@@ -12,6 +14,8 @@ public class GameOfLife extends JFrame {
 
     GridBagConstraints constraints;
 
+    // Is the universe simulation running
+    private boolean simulationRunning;
     Universe universe;
 
     // Main thread
@@ -30,6 +34,7 @@ public class GameOfLife extends JFrame {
     public void initialLayout(Universe universe, Thread mainThread) {
         this.universe = universe;
         this.mainThread = mainThread;
+        this.simulationRunning = true;
 
         createTopPanel();
         createInteractivePanel();
@@ -75,6 +80,22 @@ public class GameOfLife extends JFrame {
         constraints.gridy = 1;
         constraints.fill = GridBagConstraints.VERTICAL;
         add(interactivePanel, constraints);
+
+        // Add play/pause button
+        JButton playPause = new JButton("Pause");
+        playPause.setName("PlayToggleButton");
+        playPause.addActionListener(e -> {
+            if (this.simulationRunning) {
+                this.simulationRunning = false;
+                mainThread.interrupt();
+                playPause.setText("Pause");
+            } else {
+                this.simulationRunning = true;
+                mainThread.interrupt();
+                playPause.setText("Play");
+            }
+        });
+        interactivePanel.add(playPause);
     }
 
     private void createMapPanel() {
