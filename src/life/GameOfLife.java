@@ -12,6 +12,9 @@ public class GameOfLife extends JFrame {
 
     GridBagConstraints constraints;
 
+    // Main thread
+    Thread mainThread;
+
     public GameOfLife() {
         super("Game of Life");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -22,10 +25,11 @@ public class GameOfLife extends JFrame {
     }
 
     // Initialises the GUI layout
-    public void initialLayout(Universe universe) {
+    public void initialLayout(Universe universe, Thread mainThread) {
+        this.mainThread = mainThread;
+
         createTopPanel();
         createInteractivePanel();
-        createMapPanel(universe);
 
         pack();
         setVisible(true);
