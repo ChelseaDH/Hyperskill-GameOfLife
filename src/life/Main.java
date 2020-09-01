@@ -20,19 +20,8 @@ public class Main {
         GameOfLife gameOfLife = new GameOfLife();
         gameOfLife.initialLayout(universe, mainThread);
 
-        // Run the simulation
-        while (universe.getGenerationNumber() < 20) {
-            // Add the current generation to the board
-            gameOfLife.addGeneration(universe);
-
-            // Create the next generation
-            universe.advance();
-
-            // Sleep
-            try {
-                sleep(100);
-            } catch (InterruptedException ignored) {}
-        }
+        // Run the universe simulation from the gui
+        gameOfLife.runSimulation();
     }
 }
 

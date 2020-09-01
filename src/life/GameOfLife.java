@@ -12,6 +12,8 @@ public class GameOfLife extends JFrame {
 
     GridBagConstraints constraints;
 
+    Universe universe;
+
     // Main thread
     Thread mainThread;
 
@@ -26,10 +28,12 @@ public class GameOfLife extends JFrame {
 
     // Initialises the GUI layout
     public void initialLayout(Universe universe, Thread mainThread) {
+        this.universe = universe;
         this.mainThread = mainThread;
 
         createTopPanel();
         createInteractivePanel();
+        createMapPanel();
 
         pack();
         setVisible(true);
@@ -73,9 +77,9 @@ public class GameOfLife extends JFrame {
         add(interactivePanel, constraints);
     }
 
-    private void createMapPanel(Universe universe) {
+    private void createMapPanel() {
         // Create mapPanel
-        mapPanel = new Grid(400, 400, universe.currentGeneration.size);
+        mapPanel = new Grid(400, 400, this.universe.currentGeneration.size);
 
         // Set constraints and add to board
         constraints.gridx = 1;
@@ -87,15 +91,41 @@ public class GameOfLife extends JFrame {
     }
 
     // Add the updated universe information to GUI
-    public void addGeneration (Universe universe) {
+    public void addGeneration () {
         // Update generation and alive counters
-        generationLabel.setText(String.format("Generation #%d", universe.getGenerationNumber()));
-        aliveLabel.setText(String.format("Alive: %s", universe.currentGeneration.aliveCells()));
+        generationLabel.setText(String.format("Generation #%d", this.universe.getGenerationNumber()));
+        aliveLabel.setText(String.format("Alive: %s", this.universe.currentGeneration.aliveCells()));
 
         // Update the map within grid
-        mapPanel.setMap(universe.currentGeneration);
+        mapPanel.setMap(this.universe.currentGeneration);
         if (this.isVisible()) {
             mapPanel.repaint();
+        }
+    }
+
+    // Run the universe simulation
+    public void runSimulation() {
+        while (true) {
+            if (this.simulationRunning) {
+                try {
+                    // Add the current generation to the board
+                    this.addGeneration();
+
+                    // Create the next generation
+                    this.universe.advance();
+
+                    // Sleep
+                    sleep(100);
+                } catch (InterruptedException e) {
+                    continue;
+                }
+            } else {
+                try {
+                    sleep(1000);
+                } catch (InterruptedException e) {
+                    continue;
+                }
+            }
         }
     }
 
