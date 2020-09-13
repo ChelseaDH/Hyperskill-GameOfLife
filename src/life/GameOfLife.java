@@ -2,6 +2,7 @@ package life;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ItemEvent;
 
 import static java.lang.Thread.sleep;
 
@@ -14,20 +15,19 @@ public class GameOfLife extends JFrame {
     JLabel generationLabel;
     JLabel aliveLabel;
     JTextField mapSizeField;
-    JButton playPause;
+    JToggleButton playPause;
     JButton resetButton;
 
     GridBagConstraints constraints;
 
-    // Is the universe simulation running
-    private boolean simulationRunning;
+    // Current universe
     Universe universe;
-
-    // Has initial map been added
-    boolean initialMapAdded;
 
     // Main thread
     Thread mainThread;
+
+    // Mapsize
+    int mapSize;
 
     public GameOfLife() {
         super("Game of Life");
@@ -39,8 +39,7 @@ public class GameOfLife extends JFrame {
 
         // Set fields
         this.mainThread = Thread.currentThread();
-        this.simulationRunning = false;
-        this.initialMapAdded = false;
+        this.mapSize = 0;
 
         // Initialise panels
         createTopPanel();
@@ -97,65 +96,68 @@ public class GameOfLife extends JFrame {
     }
 
     private void addInteractivePanelComponents() {
-        // Text field to set universe size
-        mapSizeField = new JTextField();
-        mapSizeField.setMaximumSize(new Dimension(200, 50));
-        // Add field verification
-        mapSizeField.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent jComponent) {
-                String text = mapSizeField.getText();
-                int mapSize;
-
-                // Check for integer input
-                try {
-                    mapSize = Integer.parseInt(text);
-                } catch (NumberFormatException e) {
-                    return false;
-                }
-                // Check that integer is greater than 0
-                return mapSize > 0;
-            }
-        });
-        // Add ActionListener
-        mapSizeField.addActionListener(e -> {
-            // Grab input
-            int newMapSize = Integer.parseInt(mapSizeField.getText());
-
-            // Update initial map added, if applicable
-            // Set play/pause to be active upon adding initial map
-            if (!initialMapAdded) {
-                initialMapAdded = true;
-                playPause.setEnabled(true);
-                resetButton.setEnabled(true);
-            }
-
-            // Create new universe of the added size
-            this.universe = new Universe(newMapSize);
-            mapPanel.setMapSize(newMapSize);
-            updateDisplay();
-            mainThread.interrupt();
-        });
-        interactivePanel.add(mapSizeField);
-
         // Create label for mapSizeField
         JLabel mapSizeFieldLabel = new JLabel("Universe size");
         mapSizeFieldLabel.setLabelFor(mapSizeField);
         interactivePanel.add(mapSizeFieldLabel);
 
-        // Add play/pause button
-        playPause = new JButton("Play");
-        playPause.setName("PlayToggleButton");
-        playPause.addActionListener(e -> {
-            if (this.simulationRunning) {
-                this.simulationRunning = false;
-                mainThread.interrupt();
-                playPause.setText("Play");
+        // Text field to set universe size
+        mapSizeField = new JTextField();
+        mapSizeField.setMaximumSize(new Dimension(200, 50));
+        // Add ActionListener
+        mapSizeField.addCaretListener(e -> {
+            // Boolean for valid input
+            boolean isValid = false;
+            boolean isEmpty = false;
+
+            String text = mapSizeField.getText();
+            int newMapSize = 0;
+
+            if (text.equals("")) {
+                isEmpty = true;
             } else {
-                this.simulationRunning = true;
-                mainThread.interrupt();
-                playPause.setText("Pause");
+                // Grab input
+                try {
+                    newMapSize = Integer.parseInt(text);
+
+                    // Don't accept non-positive integers
+                    if (newMapSize > 0) {
+                        isValid = true;
+                    }
+
+                } catch (NumberFormatException ne) {
+                }
             }
+
+            // If we have an active universe, buttons are always enabled
+            // Else, enable only if the input is valid
+            playPause.setEnabled(isValid || universe != null);
+            resetButton.setEnabled(isValid || universe != null);
+
+            mapSizeField.setBackground(isValid || isEmpty ? Color.white : Color.red);
+
+            mapSize = newMapSize;
+        });
+        interactivePanel.add(mapSizeField);
+
+        // Add play/pause button
+        playPause = new JToggleButton("Play");
+        playPause.addItemListener(e -> {
+            int state = e.getStateChange();
+
+            // Pause -> play
+            if (state == ItemEvent.SELECTED) {
+                if (universe == null) {
+                    this.universe = new Universe(mapSize);
+                    mapPanel.setMapSize(mapSize);
+                    updateDisplay();
+                }
+
+                playPause.setText("Pause");
+            } else { // Play -> pause
+                playPause.setText("Play");
+            }
+            mainThread.interrupt();
         });
         interactivePanel.add(playPause);
 
@@ -163,11 +165,25 @@ public class GameOfLife extends JFrame {
         resetButton = new JButton("Reset");
         resetButton.setName("ResetButton");
         resetButton.addActionListener(e -> {
-            this.universe.reset();
+            // Pause the simulation
+            playPause.getModel().setSelected(false);
+
+            // Check for different valid universe size
+            if (universe.mapSize != mapSize && mapSize > 0) {
+                this.universe = new Universe(mapSize);
+                mapPanel.setMapSize(mapSize);
+            } else {
+                this.universe.reset();
+            }
+
             updateDisplay();
             mainThread.interrupt();
         });
         interactivePanel.add(resetButton);
+    }
+
+    private boolean isSimulationRunning() {
+        return playPause.getModel().isSelected();
     }
 
     private void createMapPanel() {
@@ -199,7 +215,7 @@ public class GameOfLife extends JFrame {
     // Run the universe simulation
     public void runSimulation() {
         while (true) {
-            if (this.simulationRunning) {
+            if (isSimulationRunning()) {
                 try {
                     // Add the current generation to the board
                     this.updateDisplay();
