@@ -149,7 +149,6 @@ public class GameOfLife extends JFrame {
             if (state == ItemEvent.SELECTED) {
                 if (universe == null) {
                     this.universe = new Universe(mapSize);
-                    mapPanel.setMapSize(mapSize);
                     updateDisplay();
                 }
 
@@ -171,7 +170,6 @@ public class GameOfLife extends JFrame {
             // Check for different valid universe size
             if (universe.mapSize != mapSize && mapSize > 0) {
                 this.universe = new Universe(mapSize);
-                mapPanel.setMapSize(mapSize);
             } else {
                 this.universe.reset();
             }
@@ -188,7 +186,7 @@ public class GameOfLife extends JFrame {
 
     private void createMapPanel() {
         // Create mapPanel
-        mapPanel = new Grid(400, 400);
+        mapPanel = new Grid();
 
         // Set constraints and add to board
         constraints.gridx = 1;
@@ -241,44 +239,34 @@ public class GameOfLife extends JFrame {
 
     // Class for displaying Maps
     public static class Grid extends JPanel {
-        int width, height;
-
         Map map;
-        int mapSize;
-
-        private int cellWidth, cellHeight;
-
-        public Grid(int width, int height) {
-            this.width = width;
-            this.height = height;
-            this.setPreferredSize(new Dimension(width, height));
-        }
 
         public void setMap(Map map) {
             this.map = map;
         }
 
-        public void setMapSize(int mapSize) {
-            this.mapSize = mapSize;
-            this.cellWidth = width / this.mapSize;
-            this.cellHeight = height / this.mapSize;
-        }
-
         @Override
         public void paintComponent(Graphics g) {
+            if (this.map == null) {
+                return;
+            }
+
+            int gridSize = Math.min(this.getWidth(), this.getHeight());
+            double cellSize = (double) gridSize / this.map.size;
+
             // Fill grid
-            for (int i = 0; i < this.mapSize; i++) {
-                for (int j = 0; j < this.mapSize; j++) {
+            for (int i = 0; i < this.map.size; i++) {
+                for (int j = 0; j < this.map.size; j++) {
                     g.setColor(this.map.grid[i][j].alive ? Color.black : Color.white);
-                    g.fillRect(i * this.cellWidth, j * this.cellHeight, this.cellWidth, this.cellHeight);
+                    g.fillRect((int) (i * cellSize), (int) (j * cellSize), (int) cellSize, (int) cellSize);
                 }
             }
 
             // Print grid outline
             g.setColor(Color.lightGray);
-            for (int i = 0; i <= this.mapSize; i++) {
-                g.drawLine(0, i * cellHeight, width, i * cellHeight);
-                g.drawLine(i * cellWidth, 0, i * cellWidth, height);
+            for (int i = 0; i <= this.map.size; i++) {
+                g.drawLine(0, (int) (i * cellSize), gridSize, (int) (i * cellSize));
+                g.drawLine((int) (i * cellSize), 0, (int) (i * cellSize), gridSize);
             }
         }
     }
